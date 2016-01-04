@@ -39,7 +39,7 @@ var client = {
 	"client_id": "767687922405-rnndp4osom0g6k9121ceqhq6a51oegq8.apps.googleusercontent.com",
 	"client_secret": "5Fn2vS-aH54rY4VNpQgLS5md",
 	"redirect_uris": ["http://localhost:9000/auth/google/callback"],
-	"scope": "https://www.googleapis.com/auth/userinfo.profile"
+	"scope": "https://www.googleapis.com/auth/userinfo.email"
 };
 
 //var client = {};

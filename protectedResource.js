@@ -1,8 +1,9 @@
 var express = require("express");
 var bodyParser = require('body-parser');
 var cons = require('consolidate');
-var nosql = require('nosql').load('database.nosql');
 var cors = require('cors');
+
+var request = require("sync-request");
 
 var app = express();
 
@@ -16,10 +17,18 @@ app.set('json spaces', 4);
 app.use('/', express.static('files/protectedResource'));
 app.use(cors());
 
+var authServer = {
+	authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
+	tokenEndpoint: 'https://www.googleapis.com/oauth2/v3/token',
+	userInfoEndpoint: 'https://www.googleapis.com/userinfo/v2/me'
+};
+
 var resource = {
 	"name": "Protected Resource",
 	"description": "This data has been protected by OAuth 2.0"
 };
+
+var userBody;
 
 var getAccessToken = function(req, res, next) {
 	// check the auth header first
@@ -35,27 +44,32 @@ var getAccessToken = function(req, res, next) {
 	}
 	
 	console.log('Incoming token: %s', inToken);
-	nosql.one(function(token) {
-		if (token.access_token == inToken) {
-			return token;	
-		}
-	}, function(err, token) {
-		if (token) {
-			console.log("We found a matching token: %s", inToken);
-		} else {
-			console.log('No matching token was found.');
-		}
-		req.access_token = token;
+
+	var headers = {
+		'Authorization': 'Bearer ' + inToken
+	};
+	
+		var userInfo = request('GET', authServer.userInfoEndpoint,
+		{headers: headers}
+	);
+	if (userInfo.statusCode >= 200 && userInfo.statusCode < 300) {
+		userBody = JSON.parse(userInfo.getBody());
+		console.log('Got data: ', userBody);
+		req.access_token = inToken;
 		next();
 		return;
-	});
+	} else {
+		console.log('Unable to fetch user information');
+		return;
+	}
+	
 };
 
 app.options('/resource', cors());
 app.post("/resource", cors(), getAccessToken, function(req, res){
 
 	if (req.access_token) {
-		res.json(resource);
+		res.json(userBody);
 	} else {
 		res.status(401).end();
 	}
