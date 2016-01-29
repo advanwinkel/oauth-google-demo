@@ -38,7 +38,7 @@ var rsaKey = {
 var client = {
 	"client_id": "767687922405-rnndp4osom0g6k9121ceqhq6a51oegq8.apps.googleusercontent.com",
 	"client_secret": "5Fn2vS-aH54rY4VNpQgLS5md",
-	"redirect_uris": ["http://localhost:9000/auth/google/callback"],
+	"redirect_uris": ["http://fakedomain.com:9000/auth/google/callback"],
 	"scope": "https://www.googleapis.com/auth/userinfo.email"
 };
 
@@ -509,7 +509,7 @@ app.post('/username_password', function(req, res) {
 
 app.use('/', express.static('files/client'));
 
-var server = app.listen(9000, 'localhost', function () {
+var server = app.listen(9000, '0.0.0.0', function () {
   var host = server.address().address;
   var port = server.address().port;
   console.log('OAuth Client is listening at http://%s:%s', host, port);
